@@ -2,10 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\AuthorRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use App\Entity\Book;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\AuthorRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: AuthorRepository::class)]
