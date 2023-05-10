@@ -16,17 +16,26 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 class BookController extends AbstractController
 {
     // Get All
     #[Route('/api/books', name: 'book', methods: ['GET'])]
-    public function getBookList(BookRepository $bookRepository, SerializerInterface $serializerInterface, Request $request): JsonResponse
+    public function getBookList(BookRepository $bookRepository, SerializerInterface $serializerInterface, Request $request, TagAwareCacheInterface $cachePool): JsonResponse
     {
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 3);
-        $bookList = $bookRepository->findAllWithPagination($page, $limit);
-        $jsonBookList = $serializerInterface->serialize($bookList, 'json', ['groups' => 'getBooks']);
+
+        $idCache = 'getAllBooks-' . $page . '-' . $limit;
+
+        $jsonBookList = $cachePool->get($idCache, function (ItemInterface $item) use ($bookRepository, $page, $limit, $serializerInterface) {
+            $item->tag('booksCache');
+            $bookList = $bookRepository->findAllWithPagination($page, $limit);
+            return $serializerInterface->serialize($bookList, 'json', ['groups' => 'getBooks']);
+        });
+
 
         return new JsonResponse($jsonBookList, Response::HTTP_OK, [], true);
     }
@@ -85,16 +94,14 @@ class BookController extends AbstractController
         $em->flush();
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
+
     // Delete
     #[Route('/api/books/{id}', name: 'deleteBook', methods: ['DELETE'])]
-    public function deleteBook(int $id, BookRepository $bookRepository, EntityManagerInterface $em): JsonResponse
+    public function deleteBook(Book $book, BookRepository $bookRepository, EntityManagerInterface $em, TagAwareCacheInterface $cachePool): JsonResponse
     {
-        $book = $bookRepository->find($id);
-        if ($book) {
-            $em->remove($book);
-            $em->flush();
-        }
-
+        $cachePool->invalidateTags(['booksCache']);
+        $em->remove($book);
+        $em->flush();
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }
