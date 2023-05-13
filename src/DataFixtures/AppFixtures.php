@@ -50,6 +50,7 @@ class AppFixtures extends Fixture
         for ($i = 0; $i < 20; $i++) {
             $book = new Book();
             $book->setTitle($faker->sentence(4));
+            $book->setComment($faker->text(300));
             $book->setAuthor($author_list[array_rand($author_list)]);
             $manager->persist($book);
         }
