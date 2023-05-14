@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Entity\Book;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\AuthorRepository;
+use ApiPlatform\Metadata\ApiResource;
 use JMS\Serializer\Annotation\Groups;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -39,6 +40,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *
  */
 #[ORM\Entity(repositoryClass: AuthorRepository::class)]
+#[ApiResource()]
 class Author
 {
     #[ORM\Id]

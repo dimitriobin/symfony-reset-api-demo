@@ -36,8 +36,21 @@ security:
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
 
+        auth:
+            pattern: ^/apip/auth
+            stateless: true
+            json_login:
+                check_path: /apip/auth
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
         api:
             pattern: ^/api
+            stateless: true
+            jwt: ~
+
+        apip:
+            pattern: ^/apip
             stateless: true
             jwt: ~
 
@@ -47,7 +60,9 @@ security:
     access_control:
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/doc, roles: PUBLIC_ACCESS }
-        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/apip/, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/apip/auth, roles: PUBLIC_ACCESS }
+        - { path: ^/apip, roles: PUBLIC_ACCESS }
 
 when@test:
     security:
